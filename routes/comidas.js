@@ -1,10 +1,10 @@
 // backend/routes/comidas.js
 
-const express = require('express');
-const axios   = require('axios');
-const Comida  = require('../models/comida');
-const RegistroDiario = require('../models/RegistroDiario');
-require('dotenv').config();
+const express = require("express");
+const axios = require("axios");
+const Comida = require("../models/comida");
+const RegistroDiario = require("../models/RegistroDiario");
+require("dotenv").config();
 
 const router = express.Router();
 
@@ -28,7 +28,7 @@ function sumarNutriente(detalles, key) {
  *   foto:         "http://mi-servidor.com/imagen.jpg" // (opcional)
  * }
  */
-router.post('/', async (req, res) => {
+router.post("/", async (req, res) => {
   const { usuarioId, fecha, title, ingredientes, foto } = req.body;
 
   // Validación básica
@@ -41,7 +41,7 @@ router.post('/', async (req, res) => {
   ) {
     return res.status(400).json({
       mensaje:
-        'Faltan datos. Se requiere usuarioId, fecha (YYYY-MM-DD), title y un arreglo non-empty de ingredientes.',
+        "Faltan datos. Se requiere usuarioId, fecha (YYYY-MM-DD), title y un arreglo non-empty de ingredientes.",
     });
   }
 
@@ -60,7 +60,7 @@ router.post('/', async (req, res) => {
       },
       {
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       }
     );
@@ -69,27 +69,27 @@ router.post('/', async (req, res) => {
     const detalles = edData.ingredients || [];
 
     // 2) Sumar nutrientes de todos los ingredientes
-    const totalCalorias      = sumarNutriente(detalles, 'ENERC_KCAL');
-    const totalProteinas     = sumarNutriente(detalles, 'PROCNT');
-    const totalGrasas        = sumarNutriente(detalles, 'FAT');
-    const totalCarbohidratos = sumarNutriente(detalles, 'CHOCDF');
-    const totalAzucares      = sumarNutriente(detalles, 'SUGAR');
+    const totalCalorias = sumarNutriente(detalles, "ENERC_KCAL");
+    const totalProteinas = sumarNutriente(detalles, "PROCNT");
+    const totalGrasas = sumarNutriente(detalles, "FAT");
+    const totalCarbohidratos = sumarNutriente(detalles, "CHOCDF");
+    const totalAzucares = sumarNutriente(detalles, "SUGAR");
 
     // 3) Crear documento Comida en Mongo
     const nuevaComida = new Comida({
-      usuarioId:     usuarioId,
-      fecha:         fecha,
-      title:         title,
-      ingredientes:  ingredientes,
-      foto:          foto || null,
+      usuarioId: usuarioId,
+      fecha: fecha,
+      title: title,
+      ingredientes: ingredientes,
+      foto: foto || null,
       nutricional: {
         calories: totalCalorias,
         proteins: totalProteinas,
-        fats:     totalGrasas,
-        carbs:    totalCarbohidratos,
-        sugars:   totalAzucares,
+        fats: totalGrasas,
+        carbs: totalCarbohidratos,
+        sugars: totalAzucares,
       },
-      calorias:      totalCalorias,
+      calorias: totalCalorias,
       fechaConsulta: new Date(),
     });
 
@@ -111,7 +111,7 @@ router.post('/', async (req, res) => {
 
     // 5) Calcular total de calorías consumidas en el día
     // Reemplazamos execPopulate por sólo await registro.populate(...)
-    await registro.populate('comidas');
+    await registro.populate("comidas");
     const sumaDiaria = registro.comidas.reduce(
       (acc, c) => acc + (c.calorias || 0),
       0
@@ -119,33 +119,52 @@ router.post('/', async (req, res) => {
 
     // 6) Responder con JSON
     return res.json({
-      mensaje: 'Comida analizada y guardada correctamente.',
+      mensaje: "Comida analizada y guardada correctamente.",
       comida: {
-        _id:           comidaGuardada._id,
-        title:         comidaGuardada.title,
-        ingredientes:  comidaGuardada.ingredientes,
-        foto:          comidaGuardada.foto,
+        _id: comidaGuardada._id,
+        title: comidaGuardada.title,
+        ingredientes: comidaGuardada.ingredientes,
+        foto: comidaGuardada.foto,
         nutricional: {
           calories: `${comidaGuardada.nutricional.calories.toFixed(2)} kcal`,
           proteins: `${comidaGuardada.nutricional.proteins.toFixed(2)} g`,
-          fats:     `${comidaGuardada.nutricional.fats.toFixed(2)} g`,
-          carbs:    `${comidaGuardada.nutricional.carbs.toFixed(2)} g`,
-          sugars:   `${comidaGuardada.nutricional.sugars.toFixed(2)} g`,
+          fats: `${comidaGuardada.nutricional.fats.toFixed(2)} g`,
+          carbs: `${comidaGuardada.nutricional.carbs.toFixed(2)} g`,
+          sugars: `${comidaGuardada.nutricional.sugars.toFixed(2)} g`,
         },
-        calorias:       `${comidaGuardada.calorias.toFixed(2)} kcal`,
-        fechaConsulta:  comidaGuardada.fechaConsulta,
+        calorias: `${comidaGuardada.calorias.toFixed(2)} kcal`,
+        fechaConsulta: comidaGuardada.fechaConsulta,
       },
       totalCaloriasDia: `${sumaDiaria.toFixed(2)} kcal`,
     });
   } catch (error) {
     console.error(
-      '❌ Error en POST /api/comidas:',
+      "❌ Error en POST /api/comidas:",
       error.response?.data || error.message
     );
     return res
       .status(500)
-      .json({ mensaje: 'Error al consultar Edamam o guardar en BD.' });
+      .json({ mensaje: "Error al consultar Edamam o guardar en BD." });
   }
 });
+
+// GET /api/comidas/dia?usuarioId=usuario123&fecha=YYYY-MM-DD
+router.get("/dia", async (req, res) => {
+  const { usuarioId, fecha } = req.query;
+  if (!usuarioId || !fecha) {
+    return res
+      .status(400)
+      .json({ mensaje: "usuarioId y fecha son requeridos" });
+  }
+
+  try {
+    const comidas = await Comida.find({ usuarioId, fecha });
+    res.json(comidas);
+  } catch (err) {
+    console.error("❌ Error al consultar comidas del día:", err.message);
+    res.status(500).json({ mensaje: "Error interno del servidor" });
+  }
+});
+
 
 module.exports = router;
