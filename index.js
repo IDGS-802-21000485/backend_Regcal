@@ -14,7 +14,9 @@ app.use(express.urlencoded({ limit: '10mb', extended: true }));
 const nutricionRoutes = require('./routes/nutricionRoutes');
 const comidasRoutes   = require('./routes/comidas');
 const registroRoutes  = require('./routes/registros'); // opcional, si aún la usas
+const authRoutes = require('./routes/auth');
 
+app.use('/api/auth', authRoutes);
 app.use('/api/nutricion', nutricionRoutes);
 app.use('/api/comidas',   comidasRoutes);
 app.use('/api/registros',  registroRoutes);
