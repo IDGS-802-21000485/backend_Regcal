@@ -68,6 +68,95 @@ router.post('/login', async (req, res) => {
   }
 });
 
+// Actualizar usuario (nueva ruta)
+router.put('/update/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { 
+      nombre, 
+      email, 
+      fechaNacimiento, 
+      estatura, 
+      peso, 
+      actividad, 
+      objetivo,
+      password // Opcional para cambiar contraseña
+    } = req.body;
+
+    // Validar datos requeridos
+    if (!nombre || !email || !fechaNacimiento || !estatura || !peso || !actividad || !objetivo) {
+      return res.status(400).json({ mensaje: 'Todos los campos son requeridos' });
+    }
+
+    // Buscar usuario existente
+    const usuario = await Usuario.findById(id);
+    if (!usuario) {
+      return res.status(404).json({ mensaje: 'Usuario no encontrado' });
+    }
+
+    // Verificar si el email ya está en uso por otro usuario
+    if (email !== usuario.email) {
+      const existeEmail = await Usuario.findOne({ email });
+      if (existeEmail) {
+        return res.status(400).json({ mensaje: 'El correo electrónico ya está en uso' });
+      }
+    }
+
+    // Actualizar datos básicos
+    usuario.nombre = nombre;
+    usuario.email = email;
+    usuario.fechaNacimiento = fechaNacimiento;
+    usuario.estatura = estatura;
+    usuario.peso = peso;
+    usuario.actividad = actividad;
+    usuario.objetivo = objetivo;
+
+    // Actualizar contraseña si se proporciona
+    if (password) {
+      const hashed = await bcrypt.hash(password, 10);
+      usuario.password = hashed;
+    }
+
+    // Recalcular calorías
+    const edad = calcularEdad(fechaNacimiento);
+    const tmb = calcularTMB(peso, estatura, edad);
+    const factorActividad = obtenerFactorActividad(actividad);
+    const mantenimiento = tmb * factorActividad;
+    const deficit = objetivo === 'ligero' ? mantenimiento - 300 : mantenimiento - 500;
+
+    usuario.caloriasMantenimiento = Math.round(mantenimiento);
+    usuario.caloriasObjetivo = Math.round(deficit);
+
+    // Guardar cambios
+    await usuario.save();
+
+    // Generar nuevo token si cambió el email o contraseña
+    const token = jwt.sign({ id: usuario._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+
+    res.json({
+      mensaje: 'Datos actualizados correctamente',
+      token: password || email !== usuario.email ? token : undefined, // Enviar nuevo token solo si cambió email o password
+      usuario: {
+        _id: usuario._id,
+        nombre: usuario.nombre,
+        email: usuario.email,
+        fechaNacimiento: usuario.fechaNacimiento,
+        estatura: usuario.estatura,
+        peso: usuario.peso,
+        actividad: usuario.actividad,
+        objetivo: usuario.objetivo,
+        caloriasMantenimiento: usuario.caloriasMantenimiento,
+        caloriasObjetivo: usuario.caloriasObjetivo
+      }
+    });
+
+  } catch (error) {
+    console.error('Error al actualizar usuario:', error);
+    res.status(500).json({ mensaje: 'Error al actualizar usuario' });
+  }
+});
+
+// Funciones auxiliares
 function calcularEdad(fechaNac) {
   const nac = new Date(fechaNac);
   const hoy = new Date();

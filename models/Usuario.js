@@ -5,12 +5,21 @@ const usuarioSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   fechaNacimiento: { type: Date, required: true },
-  estatura: { type: Number, required: true }, // en cm
-  peso: { type: Number, required: true }, // en kg
-  actividad: { type: String, enum: ['sedentario', 'ligero', 'moderado', 'activo', 'muy_activo'], required: true },
-  objetivo: { type: String, enum: ['ligero', 'pesado'], required: true },
-  caloriasMantenimiento: { type: Number, required: true },
-  caloriasObjetivo: { type: Number, required: true }
+  estatura: { type: Number, required: true, min: 100, max: 250 }, // en cm
+  peso: { type: Number, required: true, min: 30, max: 300 }, // en kg
+  actividad: { 
+    type: String, 
+    required: true,
+    enum: ['sedentario', 'ligero', 'moderado', 'intenso']
+  },
+  objetivo: {
+    type: String,
+    required: true,
+    enum: ['ligero', 'pesado']
+  },
+  caloriasMantenimiento: { type: Number },
+  caloriasObjetivo: { type: Number },
+  createdAt: { type: Date, default: Date.now }
 });
 
 module.exports = mongoose.model('Usuario', usuarioSchema);
