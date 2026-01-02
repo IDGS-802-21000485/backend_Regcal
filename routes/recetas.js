@@ -51,4 +51,21 @@ router.get("/", async (req, res) => {
   }
 });
 
+// DELETE /api/recetas/:id
+router.delete("/:id", async (req, res) => {
+  try {
+    const receta = await Receta.findByIdAndDelete(req.params.id);
+
+    if (!receta) {
+      return res.status(404).json({ mensaje: "Receta no encontrada" });
+    }
+
+    res.json({ mensaje: "Receta eliminada correctamente" });
+  } catch (error) {
+    console.error("❌ Error al eliminar receta:", error.message);
+    res.status(500).json({ mensaje: "Error interno del servidor" });
+  }
+});
+
+
 module.exports = router;

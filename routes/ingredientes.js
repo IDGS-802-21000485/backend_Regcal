@@ -32,5 +32,22 @@ router.get("/", async (req, res) => {
   }
 });
 
+// DELETE /api/ingredientes/:id
+router.delete("/:id", async (req, res) => {
+  try {
+    const ingrediente = await Ingrediente.findByIdAndDelete(req.params.id);
+
+    if (!ingrediente) {
+      return res.status(404).json({ mensaje: "Ingrediente no encontrado" });
+    }
+
+    res.json({ mensaje: "Ingrediente eliminado correctamente" });
+  } catch (error) {
+    console.error("❌ Error al eliminar ingrediente:", error.message);
+    res.status(500).json({ mensaje: "Error interno del servidor" });
+  }
+});
+
+
 
 module.exports = router;
