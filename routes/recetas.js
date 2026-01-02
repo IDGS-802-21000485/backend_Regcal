@@ -7,7 +7,7 @@ const router = express.Router();
 
 // Crear receta
 router.post('/', async (req, res) => {
-  const { usuarioId, title, foto, ingredientes } = req.body;
+  const { usuarioId, nombre, foto, ingredientes } = req.body;
 
   try {
     const ingredientesDB = await Ingrediente.find({
@@ -18,7 +18,7 @@ router.post('/', async (req, res) => {
 
     const receta = await Receta.create({
       usuarioId,
-      title,
+      nombre,
       foto,
       ingredientes,
       nutricional,
@@ -32,10 +32,23 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Obtener recetas por usuario
-router.get('/:usuarioId', async (req, res) => {
-  const recetas = await Receta.find({ usuarioId: req.params.usuarioId });
-  res.json(recetas);
+// GET /api/recetas?usuarioId=usuario123
+router.get("/", async (req, res) => {
+  const { usuarioId } = req.query;
+
+  if (!usuarioId) {
+    return res
+      .status(400)
+      .json({ mensaje: "usuarioId es requerido" });
+  }
+
+  try {
+    const recetas = await Receta.find({ usuarioId }).sort({ createdAt: -1 });
+    res.json(recetas);
+  } catch (err) {
+    console.error("❌ Error al obtener recetas:", err.message);
+    res.status(500).json({ mensaje: "Error interno del servidor" });
+  }
 });
 
 module.exports = router;
