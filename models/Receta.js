@@ -9,7 +9,7 @@ const IngredienteRecetaSchema = new mongoose.Schema({
 
 const RecetaSchema = new mongoose.Schema({
   usuarioId:   { type: String, required: true },
-  title:       { type: String, required: true },
+  nombre:       { type: String, required: true },
   imagen:      { type: String, default: null },
 
   ingredientes: [IngredienteRecetaSchema],
