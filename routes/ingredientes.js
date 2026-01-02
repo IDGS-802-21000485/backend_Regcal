@@ -13,10 +13,24 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Obtener ingredientes por usuario
-router.get('/:usuarioId', async (req, res) => {
-  const ingredientes = await Ingrediente.find({ usuarioId: req.params.usuarioId });
-  res.json(ingredientes);
+// GET /api/ingredientes?usuarioId=usuario123
+router.get("/", async (req, res) => {
+  const { usuarioId } = req.query;
+
+  if (!usuarioId) {
+    return res
+      .status(400)
+      .json({ mensaje: "usuarioId es requerido" });
+  }
+
+  try {
+    const ingredientes = await Ingrediente.find({ usuarioId });
+    res.json(ingredientes);
+  } catch (err) {
+    console.error("❌ Error al consultar ingredientes:", err.message);
+    res.status(500).json({ mensaje: "Error interno del servidor" });
+  }
 });
+
 
 module.exports = router;
