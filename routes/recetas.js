@@ -7,7 +7,7 @@ const router = express.Router();
 
 // Crear receta
 router.post('/', async (req, res) => {
-  const { usuarioId, nombre, foto, ingredientes } = req.body;
+  const { usuarioId, nombre, imagen, ingredientes } = req.body;
 
   try {
     const ingredientesDB = await Ingrediente.find({
@@ -19,7 +19,7 @@ router.post('/', async (req, res) => {
     const receta = await Receta.create({
       usuarioId,
       nombre,
-      foto,
+      imagen,
       ingredientes,
       nutricional,
       calorias: nutricional.calories
