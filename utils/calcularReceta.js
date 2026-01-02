@@ -8,12 +8,28 @@ function calcularTotales(ingredientesReceta, ingredientesDB) {
   };
 
   ingredientesReceta.forEach(item => {
-    const ing = ingredientesDB.find(i => i._id.toString() === item.ingredienteId);
+    const ing = ingredientesDB.find(
+      i => i._id.toString() === item.ingredienteId.toString()
+    );
 
     if (!ing) return;
 
-    const factor = item.gramos / 100;
+    // 1️⃣ Determinar cantidad real en base (g o ml)
+    let cantidadReal = item.cantidad;
 
+    if (item.unidad !== ing.unidadBase) {
+      const conversion = ing.conversiones?.[item.unidad];
+      if (!conversion) {
+        console.warn(`No existe conversión para ${item.unidad} en ${ing.nombre}`);
+        return;
+      }
+      cantidadReal = conversion * item.cantidad;
+    }
+
+    // 2️⃣ Calcular factor sobre base 100
+    const factor = cantidadReal / ing.cantidadBase;
+
+    // 3️⃣ Sumar nutrientes
     totales.calories += ing.nutricional.calories * factor;
     totales.proteins += ing.nutricional.proteins * factor;
     totales.fats     += ing.nutricional.fats * factor;

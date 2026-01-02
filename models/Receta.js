@@ -1,33 +1,28 @@
+// models/Receta.js
 const mongoose = require('mongoose');
 
-const NutrientesSchema = new mongoose.Schema({
-  calories: Number,
-  proteins: Number,
-  fats:     Number,
-  carbs:    Number,
-  sugars:   Number,
+const IngredienteRecetaSchema = new mongoose.Schema({
+  ingredienteId: { type: mongoose.Schema.Types.ObjectId, ref: 'Ingrediente' },
+  cantidad:      { type: Number, required: true },
+  unidad:        { type: String, required: true }, // g, ml, pieza, cucharada
 });
 
 const RecetaSchema = new mongoose.Schema({
-  usuarioId: { type: String, required: true },
-  title:     { type: String, required: true },
-  foto:      { type: String },
+  usuarioId:   { type: String, required: true },
+  title:       { type: String, required: true },
+  imagen:      { type: String, default: null },
 
-  ingredientes: [
-    {
-      ingredienteId: { type: mongoose.Schema.Types.ObjectId, ref: 'Ingrediente' },
-      nombre: String,
-      gramos: Number
-    }
-  ],
+  ingredientes: [IngredienteRecetaSchema],
 
-  nutricional: NutrientesSchema,
-  calorias: Number,
+  nutricional: {
+    calories: Number,
+    proteins: Number,
+    fats:     Number,
+    carbs:    Number,
+    sugars:   Number,
+  },
 
-  fechaCreacion: {
-    type: Date,
-    default: () => new Date()
-  }
+  fecha: { type: Date, default: () => new Date() },
 });
 
 module.exports = mongoose.model('Receta', RecetaSchema);
