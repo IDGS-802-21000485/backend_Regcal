@@ -1,15 +1,15 @@
-const express = require("express");
-const Ingrediente = require("../models/Ingrediente");
+const express = require('express');
+const Ingrediente = require('../models/Ingrediente');
 
 const router = express.Router();
 
 // Crear ingrediente
-router.post("/", async (req, res) => {
+router.post('/', async (req, res) => {
   try {
     const ingrediente = await Ingrediente.create(req.body);
     res.json(ingrediente);
   } catch (error) {
-    res.status(400).json({ mensaje: "Error al crear ingrediente" });
+    res.status(400).json({ mensaje: 'Error al crear ingrediente' });
   }
 });
 
@@ -18,7 +18,9 @@ router.get("/", async (req, res) => {
   const { usuarioId } = req.query;
 
   if (!usuarioId) {
-    return res.status(400).json({ mensaje: "usuarioId es requerido" });
+    return res
+      .status(400)
+      .json({ mensaje: "usuarioId es requerido" });
   }
 
   try {
@@ -33,10 +35,6 @@ router.get("/", async (req, res) => {
 // DELETE /api/ingredientes/:id
 router.delete("/:id", async (req, res) => {
   try {
-    if (!ingrediente) {
-      return res.status(404).json({ mensaje: "Ingrediente no encontrado" });
-    }
-
     const ingrediente = await Ingrediente.findByIdAndDelete(req.params.id);
 
     res.json({ mensaje: "Ingrediente eliminado correctamente" });
@@ -45,5 +43,7 @@ router.delete("/:id", async (req, res) => {
     res.status(500).json({ mensaje: "Error interno del servidor" });
   }
 });
+
+
 
 module.exports = router;
