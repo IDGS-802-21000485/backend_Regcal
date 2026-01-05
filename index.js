@@ -23,6 +23,7 @@ const registroRoutes    = require('./routes/registros');
 // 👉 NUEVAS RUTAS
 const ingredientesRoutes = require('./routes/ingredientes');
 const recetasRoutes      = require('./routes/recetas');
+const alimentosProcesadosRoutes = require('./routes/alimentosProcesados');
 
 // ====================
 // Usar rutas
@@ -31,6 +32,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/nutricion', nutricionRoutes);
 app.use('/api/comidas', comidasRoutes);
 app.use('/api/registros', registroRoutes);
+app.use('/api/alimentos-procesados', alimentosProcesadosRoutes);
 
 // 🥕 Ingredientes manuales
 app.use('/api/ingredientes', ingredientesRoutes);
